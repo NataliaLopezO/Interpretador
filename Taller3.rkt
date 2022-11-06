@@ -176,7 +176,7 @@
       
       (numero-lit (numero) numero)
       
-      (var-exp (id) id)
+      (var-exp (id) (buscar-variable env id))
       
       (texto-lit (txt) txt)
       
@@ -215,7 +215,10 @@
   )
 )
 
-
+;valor-verdad?: determina si un valor dado corresponde a un valor booleano falso o verdadero
+(define valor-verdad?
+  (lambda (x)
+    (not (zero? x))))
 
 ;*******************************************************************************************
 ;Ambientes
@@ -244,4 +247,44 @@
     (extended-env-record syms vals env)
    )
  ) 
+
+;función que busca un símbolo en un ambiente
+(define buscar-variable
+  (lambda (env id)
+    (cases environment env
+      (empty-env-record () (eopl:error "Error, la variable no existe"))
+      (extended-env-record (ids vals env)
+                           (let(
+                                 (pos (list-find-position id ids))
+                                )                             
+                               (
+                                  if (number? pos)
+                                     (list-ref vals pos)
+                                     (buscar-variable env id)
+                                )
+                           )
+      )
+    )
+  )
+)
+
+;****************************************************************************************
+;Funciones Auxiliares
+
+; funciones auxiliares para encontrar la posición de un símbolo
+; en la lista de símbolos de unambiente
+
+(define list-find-position
+  (lambda (sym los)
+    (list-index (lambda (sym1) (eqv? sym1 sym)) los)))
+
+(define list-index
+  (lambda (pred ls)
+    (cond
+      ((null? ls) #f)
+      ((pred (car ls)) 0)
+      (else (let ((list-index-r (list-index pred (cdr ls))))
+              (if (number? list-index-r)
+                (+ list-index-r 1)
+                #f))))))
 
