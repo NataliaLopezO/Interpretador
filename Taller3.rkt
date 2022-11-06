@@ -52,7 +52,7 @@
   (white-sp    (whitespace) skip)
   (comentario     ("%" (arbno (not #\newline))) skip)
   (identificador  ("@" letter (arbno (or letter digit))) symbol)
-  (texto        ( letter (arbno (or letter whitespace digit ":" "?" "=" "'" "#" "$" "&" "." "," ";" "*" )) ) string)
+  (texto        ( letter (arbno (or letter whitespace digit ":" "?" "=" "'" "#" "$" "&" "." "," ";" "*" "!" "¡" "¿" )) ) string)
   (numero     (digit (arbno digit)) number)
   (numero      ("-" digit (arbno digit)) number)
   (numero      (digit (arbno digit) "." digit (arbno digit)) number)
@@ -74,7 +74,7 @@
     
     (expresion (identificador)   var-exp)
 
-    ;;(expresion ("\""text"\"")   texto-lit)
+    (expresion ("\""texto"\"")   texto-lit)
     
     (expresion ("("expresion primitiva-binaria expresion")")   primapp-bin-exp)
        
@@ -110,3 +110,138 @@
     (sllgen:list-define-datatypes scanner-spec-simple-interpreter grammar-simple-interpreter)
   )
 )
+
+;*******************************************************************************************
+;Parser, Scanner, Interfaz
+
+;El FrontEnd (Análisis léxico (scanner) y sintáctico (parser) integrados)
+
+(define scan&parse
+  (sllgen:make-string-parser scanner-spec-simple-interpreter grammar-simple-interpreter)
+)
+
+;El Analizador Léxico (Scanner)
+
+(define just-scan
+  (sllgen:make-string-scanner scanner-spec-simple-interpreter grammar-simple-interpreter)
+)
+
+;El Interpretador (FrontEnd + Evaluación + señal para lectura )
+
+(define interpretador
+  (sllgen:make-rep-loop  "--> "
+                         
+    (lambda (pgm) (eval-programa  pgm))
+    
+    (sllgen:make-stream-parser 
+      scanner-spec-simple-interpreter
+      grammar-simple-interpreter)
+   )
+ )
+
+;*******************************************************************************************
+;El Interprete
+
+;eval-programa: <programa> -> expresion
+; función que evalúa un programa teniendo en cuenta un ambiente dado (se inicializa dentro del programa)
+
+(define eval-programa
+  (lambda (pgm)
+    (cases programa pgm
+      (un-programa (exp)
+                 (eval-expresion exp (init-env))
+      )
+    )
+  )
+)
+
+; Ambiente inicial
+
+(define init-env
+  (lambda ()
+    (extend-env
+      '(@a @b @c @d @e)
+      (list 1 2 3 "Hola" "FLP")
+      (empty-env)
+    )
+  )
+)
+
+;eval-expresion: <expresion> <enviroment> -> numero
+; evalua la expresión en el ambiente de entrada
+
+(define eval-expresion
+  (lambda (exp env)
+    (cases expresion exp
+      
+      (numero-lit (numero) numero)
+      
+      (var-exp (id) id)
+      
+      (texto-lit (txt) txt)
+      
+      (primapp-bin-exp (exp1 prim-binaria exp2) (apply-primitiva-bin  exp1 prim-binaria exp2 env))
+      
+      (primapp-un-exp (prim-unaria exp) (apply-primitiva-un prim-unaria exp env))
+                    
+     )
+   )
+)
+
+;apply-primitiva-bin: <expresion> <primitiva> <expresion> -> 
+
+(define apply-primitiva-bin
+  (lambda (exp1 prim-binaria exp2 env)
+    
+    (cases primitiva-binaria prim-binaria
+      
+      (primitiva-suma () (+ (eval-expresion exp1 env) (eval-expresion exp2 env)))
+      (primitiva-resta () (- (eval-expresion exp1 env) (eval-expresion exp2 env)))
+      (primitiva-div () (/ (eval-expresion exp1 env) (eval-expresion exp2 env)))
+      (primitiva-multi () (* (eval-expresion exp1 env) (eval-expresion exp2 env)))
+      (primitiva-concat () (string-append (eval-expresion exp1 env) (eval-expresion exp2 env)))
+    )
+  )
+)
+
+;apply-primitiva-un: <primitiva> <list-of-expresion> ->
+
+(define apply-primitiva-un
+  (lambda (prim-unaria exp env)
+    (cases primitiva-unaria prim-unaria
+      (primitiva-add1 () (+ (eval-expresion exp env) 1))
+      (primitiva-sub1 () (- (eval-expresion exp env) 1))
+    )
+  )
+)
+
+
+
+;*******************************************************************************************
+;Ambientes
+
+;definición del tipo de dato ambiente
+(define-datatype environment environment?
+  (empty-env-record)
+  (extended-env-record (syms (list-of symbol?))
+                       (vals (list-of scheme-value?))
+                       (env environment?)
+  )
+)
+
+(define scheme-value? (lambda (v) #t))
+
+;empty-env:      -> enviroment
+;función que crea un ambiente vacío
+(define empty-env  
+  (lambda () (empty-env-record))) ;llamado al constructor de ambiente vacío 
+
+
+;extend-env: <list-of symbols> <list-of numbers> enviroment -> enviroment
+;función que crea un ambiente extendido
+(define extend-env
+  (lambda (syms vals env)
+    (extended-env-record syms vals env)
+   )
+ ) 
+
