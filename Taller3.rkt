@@ -28,6 +28,9 @@
 ;;                 ::= <primitiva-unaria>(<expression>)
 ;;                     <primapp-un-exp (prim-unaria exp)>
 
+;;                 ::= Si <expresion> entonces <expresion> sino <expression> finSI
+;;                      <condicional-exp (test-exp true-exp false-exp)>
+
 
 
 
@@ -52,11 +55,11 @@
   (white-sp    (whitespace) skip)
   (comentario     ("%" (arbno (not #\newline))) skip)
   (identificador  ("@" letter (arbno (or letter digit))) symbol)
-  (texto        ( letter (arbno (or letter whitespace digit ":" "?" "=" "'" "#" "$" "&" "." "," ";" "*" "!" "¡" "¿" )) ) string)
+  (texto      ( letter (arbno (or letter digit ":" "?" "=" "'" "#" "$" "&" "." "," ";" "*" "!" "¡" "¿" )) ) string)
   (numero     (digit (arbno digit)) number)
-  (numero      ("-" digit (arbno digit)) number)
-  (numero      (digit (arbno digit) "." digit (arbno digit)) number)
-  (numero      ("-" digit (arbno digit) "." digit (arbno digit)) number)
+  (numero     ("-" digit (arbno digit)) number)
+  (numero     (digit (arbno digit) "." digit (arbno digit)) number)
+  (numero     ("-" digit (arbno digit) "." digit (arbno digit)) number)
  )
 )
 
@@ -79,6 +82,8 @@
     (expresion ("("expresion primitiva-binaria expresion")")   primapp-bin-exp)
        
     (expresion (primitiva-unaria "(" expresion ")")   primapp-un-exp)
+
+    (expresion ("Si" expresion "entonces" expresion "sino" expresion "finSI") condicional-exp)
 
     ;;Primitiva Binaria
 
@@ -183,6 +188,13 @@
       (primapp-bin-exp (exp1 prim-binaria exp2) (apply-primitiva-bin  exp1 prim-binaria exp2 env))
       
       (primapp-un-exp (prim-unaria exp) (apply-primitiva-un prim-unaria exp env))
+
+      (condicional-exp (test-exp true-exp false-exp)
+              (if (valor-verdad? (eval-expresion test-exp env))
+                  (eval-expresion true-exp env)
+                  (eval-expresion false-exp env)
+               )
+       )
                     
      )
    )
