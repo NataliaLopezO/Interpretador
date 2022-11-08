@@ -37,6 +37,8 @@
 ;;                 ::= procedimiento (<identificador>*',') haga <expresion> finProc
 ;;                    <procedimiento-ex (ids cuerpo)>
 
+;;                 := evaluar <expresion>(<expresion> ",")* finEval
+;;                    <app-exp(exp exps)>
 
 
 ;;  <primitiva-binaria>   ::= + (primitiva-suma)
@@ -95,6 +97,8 @@
     (expresion ("declarar" "(" (separated-list identificador "=" expresion ";") ")" "{" expresion "}" ) variableLocal-exp)
 
     (expresion ("procedimiento" "(" (separated-list identificador ",") ")" "haga" expresion "finProc")   procedimiento-ex)
+
+    (expresion ( "evaluar"  expresion "("(separated-list expresion ",") ")" "finEval") app-exp)
     
     ;;Primitiva Binaria
 
@@ -213,7 +217,16 @@
        )
 
       (procedimiento-ex (ids cuerpo) (cerradura ids cuerpo env))
-      
+
+      (app-exp (exp exps)
+               (let ((proc (eval-expresion exp env))
+                     (args (eval-rands exps env)))
+                 (if (procval? proc)
+                     (apply-procedure proc args)
+                     (eopl:error 'eval-expresion "Attempt to apply non-procedure ~s" proc)
+                  )
+               )
+       )
      )
    )
 )
