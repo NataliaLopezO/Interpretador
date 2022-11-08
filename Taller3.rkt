@@ -31,6 +31,8 @@
 ;;                 ::= Si <expresion> entonces <expresion> sino <expression> finSI
 ;;                      <condicional-exp (test-exp true-exp false-exp)>
 
+;;                  ::= declarar {identificador = <expresion> (;)}* { <expresion> }
+;;                      <variableLocal-exp (ids rands body)>
 
 
 
@@ -85,6 +87,8 @@
 
     (expresion ("Si" expresion "entonces" expresion "sino" expresion "finSI") condicional-exp)
 
+    (expresion ("declarar" "(" (separated-list identificador "=" expresion ";") ")" "{" expresion "}" ) variableLocal-exp)
+    
     ;;Primitiva Binaria
 
     (primitiva-binaria ("+")      primitiva-suma)
@@ -195,10 +199,24 @@
                   (eval-expresion false-exp env)
                )
        )
-                    
+       (variableLocal-exp (ids exps cuerpo)
+               (let ((args (eval-rands exps env)))
+                    (eval-expresion cuerpo (extend-env ids args env))
+               )
+       )            
      )
    )
 )
+
+; funciones auxiliares para aplicar eval-expression a cada elemento de una 
+; lista de operandos (expresiones)
+(define eval-rands
+  (lambda (exps env)
+    (map (lambda (x) (eval-rand x env)) exps)))
+
+(define eval-rand
+  (lambda (exp env)
+    (eval-expresion exp env)))
 
 ;apply-primitiva-bin: <expresion> <primitiva> <expresion> -> 
 
@@ -226,6 +244,9 @@
     )
   )
 )
+
+;*******************************************************************************************
+;;Booleanos
 
 ;valor-verdad?: determina si un valor dado corresponde a un valor booleano falso o verdadero
 (define valor-verdad?
