@@ -31,8 +31,11 @@
 ;;                 ::= Si <expresion> entonces <expresion> sino <expression> finSI
 ;;                      <condicional-exp (test-exp true-exp false-exp)>
 
-;;                  ::= declarar {identificador = <expresion> (;)}* { <expresion> }
+;;                 ::= declarar {identificador = <expresion> (;)}* { <expresion> }
 ;;                      <variableLocal-exp (ids rands body)>
+
+;;                 ::= procedimiento (<identificador>*',') haga <expresion> finProc
+;;                    <procedimiento-ex (ids cuerpo)>
 
 
 
@@ -45,6 +48,8 @@
 ;;  <primitiva-unaria>   ::= longitud(primitiva-longitud)
 ;;                       ::= add1(primitiva-add1)
 ;;                       ::= sub1(primitiva-sub1)
+
+
 
 ;******************************************************************************************
 
@@ -88,6 +93,8 @@
     (expresion ("Si" expresion "entonces" expresion "sino" expresion "finSI") condicional-exp)
 
     (expresion ("declarar" "(" (separated-list identificador "=" expresion ";") ")" "{" expresion "}" ) variableLocal-exp)
+
+    (expresion ("procedimiento" "(" (separated-list identificador ",") ")" "haga" expresion "finProc")   procedimiento-ex)
     
     ;;Primitiva Binaria
 
@@ -203,7 +210,10 @@
                (let ((args (eval-rands exps env)))
                     (eval-expresion cuerpo (extend-env ids args env))
                )
-       )            
+       )
+
+      (procedimiento-ex (ids cuerpo) (cerradura ids cuerpo env))
+      
      )
    )
 )
@@ -254,6 +264,22 @@
     (not (zero? x))))
 
 ;*******************************************************************************************
+
+;Procedimientos
+(define-datatype procval procval?
+  (cerradura
+   (lista-ID (list-of symbol?))
+   (exp expresion?)
+   (amb environment?)))
+
+;apply-procedure: evalua el cuerpo de un procedimientos en el ambiente extendido correspondiente
+(define apply-procedure
+  (lambda (proc args)
+    (cases procval proc
+      (cerradura (ids body env)
+               (eval-expresion body (extend-env ids args env))))))
+
+;********************************************************************************************
 ;Ambientes
 
 ;definición del tipo de dato ambiente
