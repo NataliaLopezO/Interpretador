@@ -40,6 +40,9 @@
 ;;                 := evaluar <expresion>(<expresion> ",")* finEval
 ;;                    <app-exp(exp exps)>
 
+;;                 ::= letrec  {identifier ({identifier}*(,)) = <expression>}* in <expression>
+;;                     <letrec-exp proc-names idss bodies bodyletrec>
+
 
 ;;  <primitiva-binaria>   ::= + (primitiva-suma)
 ;;                        ::= ~ (primitiva-resta)
@@ -99,6 +102,8 @@
     (expresion ("procedimiento" "(" (separated-list identificador ",") ")" "haga" expresion "finProc")   procedimiento-ex)
 
     (expresion ( "evaluar"  expresion "("(separated-list expresion ",") ")" "finEval") app-exp)
+    
+    (expresion ("letrec" (arbno identificador "(" (separated-list identificador ",") ")" "=" expresion)  "in" expresion) letrec-exp)
     
     ;;Primitiva Binaria
 
@@ -227,6 +232,11 @@
                   )
                )
        )
+
+      (letrec-exp (proc-names idss bodies letrec-body)
+                  idss
+
+      )
      )
    )
 )
