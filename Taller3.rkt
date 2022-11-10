@@ -234,7 +234,9 @@
        )
 
       (letrec-exp (proc-names idss bodies letrec-body)
-                  idss
+                  (eval-expresion letrec-body
+                                   (extend-env-recursively proc-names idss bodies env))
+                  
 
       )
      )
@@ -312,7 +314,14 @@
                        (vals (list-of scheme-value?))
                        (env environment?)
   )
+  (recursively-extended-env-record (proc-names (list-of symbol?))
+                                   (idss (list-of (list-of symbol?)))
+                                   (bodies (list-of expresion?))
+                                   (env environment?)
+  )
 )
+
+
 
 (define scheme-value? (lambda (v) #t))
 
@@ -330,7 +339,9 @@
    )
  ) 
 
-;función que busca un símbolo en un ambiente
+
+;buscar-variable: <ambiente><identificador> -> <scheme-value>
+;proposito: función que busca un símbolo en un ambiente y devuelve lo que este almacenado.
 (define buscar-variable
   (lambda (env id)
     (cases environment env
@@ -338,7 +349,7 @@
       (extended-env-record (ids vals env)
                            (let(
                                  (pos (list-find-position id ids))
-                                )                             
+                                )
                                (
                                   if (number? pos)
                                      (list-ref vals pos)
@@ -346,9 +357,25 @@
                                 )
                            )
       )
+      (recursively-extended-env-record (proc-names idss bodies old-env)
+                                       (let ((pos (list-find-position id proc-names)))
+                                         (if (number? pos)
+                                             (cerradura (list-ref idss pos)
+                                                      (list-ref bodies pos)
+                                                      env)
+                                             (buscar-variable old-env id)))
+      )
     )
   )
 )
+
+;extend-env-recursively: <list-of symbols> <list-of <list-of symbols>> <list-of expressions> environment -> environment
+;función que crea un ambiente extendido para procedimientos recursivos
+(define extend-env-recursively
+  (lambda (proc-names idss bodies old-env)
+    (recursively-extended-env-record
+     proc-names idss bodies old-env)))
+
 
 ;****************************************************************************************
 ;Funciones Auxiliares
