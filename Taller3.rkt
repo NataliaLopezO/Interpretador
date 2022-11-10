@@ -192,8 +192,9 @@
   )
 )
 
-;eval-expresion: <expresion> <enviroment> -> numero
-; evalua la expresión en el ambiente de entrada
+;eval-expresion: <expresion> <enviroment> -> 
+; evalua la expresión en el ambiente de entrada, para cada caso (numero-lit, var-exp, text-lit,condicional-exp, variableLocal-exp
+;procedimiento-ex, app-exp, letrec, primapp-bin-exp, primapp-un-exp) devuelve algo diferente.
 
 (define eval-expresion
   (lambda (exp env)
@@ -243,17 +244,28 @@
    )
 )
 
+
 ; funciones auxiliares para aplicar eval-expression a cada elemento de una 
 ; lista de operandos (expresiones)
+
+;eval-rands: <list-expresion> <enviroment> -> <list>
+;proposito: realiza un mapeo de la funcion eval-expression por todos los elementos de la lista para que cada elemento sea evaluado.
+
 (define eval-rands
   (lambda (exps env)
     (map (lambda (x) (eval-rand x env)) exps)))
+
+
+;eval-rand:<expresion> <enviroment> -> <>
+;proposito: aplica la funcion eval-expression a una expresion en sintaxis abstracta en un ambiente.
 
 (define eval-rand
   (lambda (exp env)
     (eval-expresion exp env)))
 
-;apply-primitiva-bin: <expresion> <primitiva> <expresion> -> 
+;apply-primitiva-bin: <expresion> <primitiva> <expresion> -> <numero> o <texto>
+;Proposito: Realiza operaciones binarias como suma, resta, multiplicacion y division para los numeros o identificadores que sean
+;numeros, y concat para los textos o identificadores que sean textos
 
 (define apply-primitiva-bin
   (lambda (exp1 prim-binaria exp2 env)
@@ -269,7 +281,10 @@
   )
 )
 
-;apply-primitiva-un: <primitiva> <list-of-expresion> ->
+;apply-primitiva-un: <primitiva> <expresion> -> <numero> o <texto>
+;Proposito: Realiza operaciones unarias como add1 (suma una unidad a un numero), sub1 (resta una unidad a un numero)
+;para los numeros o identificadores que sean numeros, y longitud para los textos o identificadores que sean textos.
+
 
 (define apply-primitiva-un
   (lambda (prim-unaria exp env)
@@ -383,9 +398,11 @@
 ; funciones auxiliares para encontrar la posición de un símbolo
 ; en la lista de símbolos de unambiente
 
+
 (define list-find-position
   (lambda (sym los)
     (list-index (lambda (sym1) (eqv? sym1 sym)) los)))
+
 
 (define list-index
   (lambda (pred ls)
