@@ -429,4 +429,17 @@
 ;****************************************************************************************
 ;Ejercicios evaluables
 
+;;a)
+
+;declarar (
+;
+;      @radio=2.5;
+;      @areaCirculo= procedimiento(@r) haga (3.1416*(@r*@r)) finProc
+;
+;     ) { 
+;
+;         evaluar @areaCirculo (@radio) finEval  
+;
+;       }
+
 
