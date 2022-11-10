@@ -31,10 +31,7 @@
 ;;                 ::= Si <expresion> entonces <expresion> sino <expression> finSI
 ;;                      <condicional-exp (test-exp true-exp false-exp)>
 
-;;                 ::= declarar {identificador = <expresion> (;)}* { <expresion> }
-;;                      <variableLocal-exp (ids rands body)>
-
-;;                 ::= procedimiento (<identificador>*',') haga <expresion> finProc
+;;                 := procedimiento (<identificador>*',') haga <expresion> finProc
 ;;                    <procedimiento-ex (ids cuerpo)>
 
 ;;                 := evaluar <expresion>(<expresion> ",")* finEval
@@ -42,6 +39,8 @@
 
 ;;                 ::= letrec  {identifier ({identifier}*(,)) = <expression>}* in <expression>
 ;;                     <letrec-exp proc-names idss bodies bodyletrec>
+
+
 
 
 ;;  <primitiva-binaria>   ::= + (primitiva-suma)
@@ -54,8 +53,6 @@
 ;;                       ::= add1(primitiva-add1)
 ;;                       ::= sub1(primitiva-sub1)
 
-
-
 ;******************************************************************************************
 
 ;******************************************************************************************
@@ -67,11 +64,11 @@
   (white-sp    (whitespace) skip)
   (comentario     ("%" (arbno (not #\newline))) skip)
   (identificador  ("@" letter (arbno (or letter digit))) symbol)
-  (texto      ( letter (arbno (or letter digit ":" "?" "=" "'" "#" "$" "&" "." "," ";" "*" "!" "¡" "¿" )) ) string)
-  (numero     (digit (arbno digit)) number)
-  (numero     ("-" digit (arbno digit)) number)
-  (numero     (digit (arbno digit) "." digit (arbno digit)) number)
-  (numero     ("-" digit (arbno digit) "." digit (arbno digit)) number)
+  (texto        (letter (arbno (or letter digit ":" "?" "=" "'" "#" "$" "&" "." "," ";" "*" "!" "¡" "¿" "-" "_"))) string)
+  (numero       (digit (arbno digit)) number)
+  (numero       ("-" digit (arbno digit)) number)
+  (numero       (digit (arbno digit) "." digit (arbno digit)) number)
+  (numero       ("-" digit (arbno digit) "." digit (arbno digit)) number)
  )
 )
 
@@ -99,11 +96,12 @@
 
     (expresion ("declarar" "(" (separated-list identificador "=" expresion ";") ")" "{" expresion "}" ) variableLocal-exp)
 
-    (expresion ("procedimiento" "(" (separated-list identificador ",") ")" "haga" expresion "finProc")   procedimiento-ex)
+    (expresion ("procedimiento" "(" (separated-list identificador ",") ")" "haga" expresion "finProc" ) procedimiento-ex)
 
     (expresion ( "evaluar"  expresion "("(separated-list expresion ",") ")" "finEval") app-exp)
-    
+
     (expresion ("letrec" (arbno identificador "(" (separated-list identificador ",") ")" "=" expresion)  "in" expresion) letrec-exp)
+
     
     ;;Primitiva Binaria
 
@@ -118,12 +116,16 @@
     (primitiva-binaria ("concat") primitiva-concat)
 
     ;;Primitiva Unaria
+
+    (primitiva-unaria ("longitud")  primitiva-longitud)
     
     (primitiva-unaria ("add1") primitiva-add1)
     
     (primitiva-unaria ("sub1") primitiva-sub1)
   )
 )
+
+
 
 ;*******************************************************************************************
 ;Tipos de datos para la sintaxis abstracta de la gramática construidos automáticamente:
@@ -193,7 +195,7 @@
 )
 
 ;eval-expresion: <expresion> <enviroment> -> 
-; evalua la expresión en el ambiente de entrada, para cada caso (numero-lit, var-exp, text-lit,condicional-exp, variableLocal-exp
+; evalua la expresión en el ambiente de entrada, para cada caso (numero-lit,var-exp,texto-lit, condicional-exp, variableLocal-exp
 ;procedimiento-ex, app-exp, letrec, primapp-bin-exp, primapp-un-exp) devuelve algo diferente.
 
 (define eval-expresion
@@ -205,10 +207,6 @@
       (var-exp (id) (buscar-variable env id))
       
       (texto-lit (txt) txt)
-      
-      (primapp-bin-exp (exp1 prim-binaria exp2) (apply-primitiva-bin  exp1 prim-binaria exp2 env))
-      
-      (primapp-un-exp (prim-unaria exp) (apply-primitiva-un prim-unaria exp env))
 
       (condicional-exp (test-exp true-exp false-exp)
               (if (valor-verdad? (eval-expresion test-exp env))
@@ -216,7 +214,9 @@
                   (eval-expresion false-exp env)
                )
        )
-       (variableLocal-exp (ids exps cuerpo)
+
+
+      (variableLocal-exp (ids exps cuerpo)
                (let ((args (eval-rands exps env)))
                     (eval-expresion cuerpo (extend-env ids args env))
                )
@@ -236,32 +236,38 @@
 
       (letrec-exp (proc-names idss bodies letrec-body)
                   (eval-expresion letrec-body
-                                   (extend-env-recursively proc-names idss bodies env))
-                  
+                                   (extend-env-recursively proc-names idss bodies env)))
+      
+      
+      (primapp-bin-exp (exp1 prim-binaria exp2) (apply-primitiva-bin  exp1 prim-binaria exp2 env))
+      
+      (primapp-un-exp (prim-unaria exp) (apply-primitiva-un prim-unaria exp env))
 
-      )
+      
+                    
      )
    )
 )
 
-
 ; funciones auxiliares para aplicar eval-expression a cada elemento de una 
 ; lista de operandos (expresiones)
 
-;eval-rands: <list-expresion> <enviroment> -> <list>
+;eval-rands:
 ;proposito: realiza un mapeo de la funcion eval-expression por todos los elementos de la lista para que cada elemento sea evaluado.
-
 (define eval-rands
   (lambda (exps env)
-    (map (lambda (x) (eval-rand x env)) exps)))
+    (map (lambda (x) (eval-rand x env)) exps)
+  )
+)
 
-
-;eval-rand:<expresion> <enviroment> -> <>
+;eval-rand:
 ;proposito: aplica la funcion eval-expression a una expresion en sintaxis abstracta en un ambiente.
 
 (define eval-rand
   (lambda (exp env)
-    (eval-expresion exp env)))
+    (eval-expresion exp env)
+  )
+)
 
 ;apply-primitiva-bin: <expresion> <primitiva> <expresion> -> <numero> o <texto>
 ;Proposito: Realiza operaciones binarias como suma, resta, multiplicacion y division para los numeros o identificadores que sean
@@ -285,10 +291,10 @@
 ;Proposito: Realiza operaciones unarias como add1 (suma una unidad a un numero), sub1 (resta una unidad a un numero)
 ;para los numeros o identificadores que sean numeros, y longitud para los textos o identificadores que sean textos.
 
-
 (define apply-primitiva-un
   (lambda (prim-unaria exp env)
     (cases primitiva-unaria prim-unaria
+      (primitiva-longitud () (string-length (eval-expresion exp env)))
       (primitiva-add1 () (+ (eval-expresion exp env) 1))
       (primitiva-sub1 () (- (eval-expresion exp env) 1))
     )
@@ -298,13 +304,15 @@
 ;*******************************************************************************************
 ;;Booleanos
 
-;valor-verdad?: determina si un valor dado corresponde a un valor booleano falso o verdadero
+;valor-verdad?: <numero> -> <booleano>
+;Proposito: determina si un valor dado corresponde a un valor booleano falso o verdadero. Devuelve true para cualquier numero
+;diferente de cero, y false para cero
+
 (define valor-verdad?
   (lambda (x)
     (not (zero? x))))
 
 ;*******************************************************************************************
-
 ;Procedimientos
 (define-datatype procval procval?
   (cerradura
@@ -312,14 +320,16 @@
    (exp expresion?)
    (amb environment?)))
 
-;apply-procedure: evalua el cuerpo de un procedimientos en el ambiente extendido correspondiente
+;apply-procedure: 
+;proposito: Evalua el cuerpo de un procedimientos en el ambiente extendido correspondiente
+
 (define apply-procedure
   (lambda (proc args)
     (cases procval proc
       (cerradura (ids body env)
                (eval-expresion body (extend-env ids args env))))))
 
-;********************************************************************************************
+;*******************************************************************************************
 ;Ambientes
 
 ;definición del tipo de dato ambiente
@@ -336,7 +346,7 @@
   )
 )
 
-
+;;Predicado para representar cualquier valor. 
 
 (define scheme-value? (lambda (v) #t))
 
@@ -354,7 +364,6 @@
    )
  ) 
 
-
 ;buscar-variable: <ambiente><identificador> -> <scheme-value>
 ;proposito: función que busca un símbolo en un ambiente y devuelve lo que este almacenado.
 (define buscar-variable
@@ -364,9 +373,9 @@
       (extended-env-record (ids vals env)
                            (let(
                                  (pos (list-find-position id ids))
-                                )
+                                )                             
                                (
-                                  if (number? pos)
+                                if (number? pos)
                                      (list-ref vals pos)
                                      (buscar-variable env id)
                                 )
@@ -391,7 +400,6 @@
     (recursively-extended-env-record
      proc-names idss bodies old-env)))
 
-
 ;****************************************************************************************
 ;Funciones Auxiliares
 
@@ -403,7 +411,6 @@
   (lambda (sym los)
     (list-index (lambda (sym1) (eqv? sym1 sym)) los)))
 
-
 (define list-index
   (lambda (pred ls)
     (cond
@@ -413,4 +420,3 @@
               (if (number? list-index-r)
                 (+ list-index-r 1)
                 #f))))))
-
