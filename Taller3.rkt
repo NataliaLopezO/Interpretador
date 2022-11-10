@@ -252,7 +252,7 @@
 ; funciones auxiliares para aplicar eval-expression a cada elemento de una 
 ; lista de operandos (expresiones)
 
-;eval-rands:
+;eval-rands: <expresion> <enviroment> -> <>
 ;proposito: realiza un mapeo de la funcion eval-expression por todos los elementos de la lista para que cada elemento sea evaluado.
 (define eval-rands
   (lambda (exps env)
@@ -260,7 +260,7 @@
   )
 )
 
-;eval-rand:
+;eval-rand:<expresion> <enviroment> -> <>
 ;proposito: aplica la funcion eval-expression a una expresion en sintaxis abstracta en un ambiente.
 
 (define eval-rand
@@ -314,13 +314,15 @@
 
 ;*******************************************************************************************
 ;Procedimientos
+
+;se crea el tipo de dato procval
 (define-datatype procval procval?
   (cerradura
    (lista-ID (list-of symbol?))
    (exp expresion?)
    (amb environment?)))
 
-;apply-procedure: 
+;apply-procedure: <process> <arguments> -> <>
 ;proposito: Evalua el cuerpo de un procedimientos en el ambiente extendido correspondiente
 
 (define apply-procedure
@@ -350,7 +352,7 @@
 
 (define scheme-value? (lambda (v) #t))
 
-;empty-env:      -> enviroment
+;empty-env:  <>   -> enviroment
 ;función que crea un ambiente vacío
 (define empty-env  
   (lambda () (empty-env-record))) ;llamado al constructor de ambiente vacío 
