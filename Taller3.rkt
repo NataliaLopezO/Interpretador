@@ -442,4 +442,9 @@
 ;
 ;       }
 
+;;c)
 
+;letrec
+;       @sumar(@a,@b) = Si @a entonces add1(evaluar @sumar(sub1(@a),@b)finEval) sino @b finSI
+;       in
+;       evaluar @sumar(4,5) finEval
