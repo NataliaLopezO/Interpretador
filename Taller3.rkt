@@ -463,3 +463,22 @@
 ;      @multiplicar(@a,@b) = Si @a entonces evaluar @sumar(evaluar @multiplicar(sub1(@a),@b) finEval ,@b)finEval sino 0 finSI
 ;      in 
 ;      evaluar @multiplicar(10,3) finEval
+
+;;e)
+
+;declarar(
+;
+;         @integrantes = procedimiento() haga "Steban-Gabriel-Carolain-Hernando-y-Natalia" finProc ;
+;         @saludar = procedimiento (@proc) haga procedimiento() haga ("Hola: " concat evaluar @proc() finEval) finProc finProc
+;
+;         )
+;
+;         {
+;          declarar(
+;                   @decorate = evaluar @saludar (@integrantes) finEval
+;                   )
+;                  {
+;                   evaluar @decorate () finEval
+;                  }
+;
+;          }
