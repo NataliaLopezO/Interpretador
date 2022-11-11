@@ -482,3 +482,22 @@
 ;                  }
 ;
 ;          }
+
+
+;;f)
+
+; declarar(
+;         @integrantes = procedimiento(@t) haga ("Steban-Gabriel-Carolain-Hernando-y-Natalia-" concat @t) finProc ;
+;         @saludar = procedimiento (@proc) haga procedimiento(@text) haga ("Hola: " concat evaluar @proc(@text) finEval) finProc finProc 
+;         )
+;
+;         {
+;          declarar(
+;
+;                   @decorate = evaluar @saludar(@integrantes) finEval
+;                             )
+;                  {
+;                   evaluar @decorate("BestoTeam") finEval
+;                  }
+;
+;          }
