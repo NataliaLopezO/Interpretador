@@ -448,3 +448,11 @@
 ;       @sumar(@a,@b) = Si @a entonces add1(evaluar @sumar(sub1(@a),@b)finEval) sino @b finSI
 ;       in
 ;       evaluar @sumar(4,5) finEval
+
+;;d-resta)
+
+;letrec
+;       @resta(@a,@b) = Si @b entonces sub1(evaluar @resta(@a,sub1(@b))finEval) sino @a finSI
+;       in
+;       evaluar @resta(10,3) finEval
+
