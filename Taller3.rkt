@@ -456,3 +456,10 @@
 ;       in
 ;       evaluar @resta(10,3) finEval
 
+;;d-multiplicacion)
+
+;letrec
+;      @sumar(@a,@b) = Si @a entonces add1(evaluar @sumar(sub1(@a),@b)finEval) sino @b finSI
+;      @multiplicar(@a,@b) = Si @a entonces evaluar @sumar(evaluar @multiplicar(sub1(@a),@b) finEval ,@b)finEval sino 0 finSI
+;      in 
+;      evaluar @multiplicar(10,3) finEval
