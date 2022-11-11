@@ -196,9 +196,9 @@
   )
 )
 
-;eval-expresion: <expresion> <enviroment> -> 
+;eval-expresion: <expresion> <enviroment> ->  
 ; evalua la expresión en el ambiente de entrada, para cada caso (numero-lit,var-exp,texto-lit, condicional-exp, variableLocal-exp
-;procedimiento-ex, app-exp, letrec, primapp-bin-exp, primapp-un-exp) devuelve algo diferente.
+;procedimiento-ex, app-exp, letrec, primapp-bin-exp, primapp-un-exp) devuelve algo diferente dependiendo del caso de la expresión.
 
 (define eval-expresion
   (lambda (exp env)
@@ -426,10 +426,10 @@
                 #f))))))
 
 
-;****************************************************************************************
+;********************************************************************************************************************************
 ;Ejercicios evaluables
 
-;;a)
+;;a)El procedimiento areaCirculo permite calcular el area de un circulo dado un radio (A=PI*r*r). 
 
 ;declarar (
 ;
@@ -441,22 +441,39 @@
 ;         evaluar @areaCirculo (@radio) finEval  
 ;
 ;       }
+;------------------------------------------------------------------------------------------------------------------------------
+;;b) Factorial de un numero n de forma resursiva
 
-;;c)
+;letrec
+               ;@fact(@n) = Si @n entonces (@n * evaluar @fact(sub1(@n)) finEval) sino 1 finSI
+               ;in
+               ;evaluar @fact(3) finEval
+
+
+;-----------------------------------------------------------------------------------------------------------------------------
+
+;;c) calcula la suma de dos numeros forma recursiva con las primitivas add1 y sub1. 
 
 ;letrec
 ;       @sumar(@a,@b) = Si @a entonces add1(evaluar @sumar(sub1(@a),@b)finEval) sino @b finSI
 ;       in
 ;       evaluar @sumar(4,5) finEval
 
-;;d-resta)
+
+;------------------------------------------------------------------------------------------------------------------------------
+
+;;d)
+
+;d-resta: calcula la resta de dos numeros de forma recursiva con las primitivas add1 y sub1. 
 
 ;letrec
 ;       @resta(@a,@b) = Si @b entonces sub1(evaluar @resta(@a,sub1(@b))finEval) sino @a finSI
 ;       in
 ;       evaluar @resta(10,3) finEval
 
-;;d-multiplicacion)
+
+
+;;d-multiplicacion: calcula la multiplicación de dos numeros de forma recursiva con las primitivas add1 y sub1. 
 
 ;letrec
 ;      @sumar(@a,@b) = Si @a entonces add1(evaluar @sumar(sub1(@a),@b)finEval) sino @b finSI
@@ -464,7 +481,10 @@
 ;      in 
 ;      evaluar @multiplicar(10,3) finEval
 
-;;e)
+;-------------------------------------------------------------------------------------------------------------------------------
+
+;;e) Se crea una función ntegrantes que muestra los respectivos nombres de los integrantes, y adicionalmente se crea un
+;;   decorador que al invocarla saluda a los integrantes
 
 ;declarar(
 ;
@@ -483,8 +503,9 @@
 ;
 ;          }
 
+;---------------------------------------------------------------------------------------------------------------------------------------
 
-;;f)
+;;f)  Se perfecciona la función del decorador anterior reciba como parámetro otro mensaje que debe ponerse al final de todo el string.
 
 ; declarar(
 ;         @integrantes = procedimiento(@t) haga ("Steban-Gabriel-Carolain-Hernando-y-Natalia-" concat @t) finProc ;
@@ -501,3 +522,5 @@
 ;                  }
 ;
 ;          }
+
+;----------------------------------------------------------------------------------------------------------------------------------------
